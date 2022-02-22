@@ -14,7 +14,6 @@ use std::sync::Mutex;
 static mut video_subsystem: OnceCell<Mutex<sdl2::VideoSubsystem>> = OnceCell::new();
 static mut window: OnceCell<Mutex<sdl2::video::Window>> = OnceCell::new();
 static mut events: OnceCell<Mutex<sdl2::EventPump>> = OnceCell::new();
-static mut canvas: OnceCell<Mutex<sdl2::render::Canvas<sdl2::video::Window>>> = OnceCell::new();
 static mut keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut old_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
@@ -51,10 +50,6 @@ pub fn init(title: &str, screen_width: u32, screen_height: u32) {
                 .unwrap(),
         ));
         events.set(Mutex::new(sdl_context.event_pump().unwrap()));
-    canvas.set(Mutex::new(sdl2::render::CanvasBuilder::new(clone(*window.get_mut().unwrap().get_mut().unwrap()))
-        .accelerated()
-        .present_vsync()
-        .build().unwrap()));
         keys.set(Mutex::new(HashMap::new()));
         old_keys.set(Mutex::new(HashMap::new()));
         pressed_keys.set(Mutex::new(HashMap::new()));
