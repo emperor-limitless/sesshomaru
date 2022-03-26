@@ -89,7 +89,7 @@ pub fn poll() -> bool {
                         k.remove(&key);
                     }
                 }
-                Event::TextInput { text, .. } => { TEXT = text.clone(); }
+                Event::TextEditing { text, .. } => { TEXT = text.clone(); }
                 _ => {}
             }
         }
