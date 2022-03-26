@@ -18,7 +18,7 @@ static mut keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut old_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut TEXT: String = String::new();
-fn get_text() -> &'static str {
+pub fn get_text() -> &'static str {
     unsafe { &TEXT }
 }
 fn get_event() -> &'static mut sdl2::EventPump {
