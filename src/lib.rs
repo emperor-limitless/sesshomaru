@@ -4,20 +4,32 @@ extern crate sdl2;
 use once_cell::sync::OnceCell;
 use std::clone::*;
 use sdl2::event::Event;
+use sdl2::messagebox::*;
+pub use sdl2::messagebox::MessageBoxFlag;
 pub use sdl2::keyboard::*;
 use sdl2::video::Window;
 use sdl2::video::*;
 use std::collections::HashMap;
 use std::sync::Mutex;
-
-//static sdl_context: OnceCell<Mutex<sdl2::Sdl>> = OnceCell::new();
 static mut video_subsystem: OnceCell<Mutex<sdl2::VideoSubsystem>> = OnceCell::new();
-static mut window: OnceCell<Mutex<sdl2::video::Window>> = OnceCell::new();
+static mut canvas: OnceCell<Mutex<sdl2::render::Canvas<sdl2::video::Window>>> = OnceCell::new();
 static mut events: OnceCell<Mutex<sdl2::EventPump>> = OnceCell::new();
 static mut keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut old_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut TEXT: String = String::new();
+#[macro_export]
+macro_rules! ok_dialog {
+    ( title: &str, message: &str, $( flag:MessageBoxFlag)?) => {
+        {
+            let mut flag1 = MessageBoxFlag::INFORMATION;
+            $(
+                flag1 = flag;
+            )?
+            show_simple_message_box(flag1, title, message, unsafe { canvas.get_mut().unwrap().get_mut().unwrap().window() });
+        }
+    };
+}
 pub fn get_text() -> &'static str {
     unsafe { &TEXT }
 }
@@ -37,12 +49,12 @@ let k = keys.get_mut().unwrap().get_mut().unwrap();
 k[&key] }
 }
 
-pub fn init(title: &str, screen_width: u32, screen_height: u32) {
+pub fn init(title: &str, screen_width: u32, screen_height: u32, vsync: bool) {
     unsafe {
         let mut sdl_context = sdl2::init().unwrap();
         video_subsystem.set(Mutex::new(sdl_context.video().unwrap()));
         video_subsystem.get_mut().unwrap().get_mut().unwrap().text_input().start();
-        window.set(Mutex::new(
+        let mut window = 
             video_subsystem
                 .get_mut()
                 .unwrap()
@@ -51,8 +63,10 @@ pub fn init(title: &str, screen_width: u32, screen_height: u32) {
                 .window(title, screen_width, screen_height)
                 .position_centered()
                 .build()
-                .unwrap(),
-        ));
+                .unwrap();
+        let mut canv = window.into_canvas();
+        if vsync { canv = canv.present_vsync(); }
+        canvas.set(Mutex::new(canv.build().unwrap()));
         events.set(Mutex::new(sdl_context.event_pump().unwrap()));
         keys.set(Mutex::new(HashMap::new()));
         old_keys.set(Mutex::new(HashMap::new()));
@@ -89,7 +103,7 @@ pub fn poll() -> bool {
                         k.remove(&key);
                     }
                 }
-                Event::TextEditing { text, .. } => { TEXT = text.clone(); }
+                Event::TextInput { text, .. } => { TEXT = text.clone(); }
                 _ => {}
             }
         }
