@@ -20,13 +20,13 @@ static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::ne
 static mut TEXT: String = String::new();
 #[macro_export]
 macro_rules! ok_dialog {
-    ( title: &str, message: &str, $( flag:MessageBoxFlag)?) => {
+    ( *title: literal, $message: literal, $( flag:MessageBoxFlag)?) => {
         {
             let mut flag1 = MessageBoxFlag::INFORMATION;
             $(
                 flag1 = flag;
             )?
-            show_simple_message_box(flag1, title, message, unsafe { canvas.get_mut().unwrap().get_mut().unwrap().window() });
+            show_simple_message_box(flag1, $title, $message, unsafe { canvas.get_mut().unwrap().get_mut().unwrap().window() });
         }
     };
 }
