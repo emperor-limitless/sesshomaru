@@ -20,7 +20,7 @@ static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::ne
 static mut TEXT: String = String::new();
 #[macro_export]
 macro_rules! ok_dialog {
-    ( *title: literal, $message: literal, $( flag:MessageBoxFlag)?) => {
+    ( $title: literal, $message: literal, $( flag:MessageBoxFlag)?) => {
         {
             let mut flag1 = MessageBoxFlag::INFORMATION;
             $(
