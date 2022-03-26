@@ -17,7 +17,10 @@ static mut events: OnceCell<Mutex<sdl2::EventPump>> = OnceCell::new();
 static mut keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut old_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
 static mut pressed_keys: OnceCell<Mutex<HashMap<Scancode, bool>>> = OnceCell::new();
-
+static mut TEXT: String = String::new();
+fn get_text() -> &'static str {
+    unsafe { &TEXT }
+}
 fn get_event() -> &'static mut sdl2::EventPump {
     unsafe { events.get_mut().unwrap().get_mut().unwrap() }
 }
@@ -38,6 +41,7 @@ pub fn init(title: &str, screen_width: u32, screen_height: u32) {
     unsafe {
         let mut sdl_context = sdl2::init().unwrap();
         video_subsystem.set(Mutex::new(sdl_context.video().unwrap()));
+        video_subsystem.get_mut().unwrap().get_mut().unwrap().text_input().start();
         window.set(Mutex::new(
             video_subsystem
                 .get_mut()
@@ -57,6 +61,7 @@ pub fn init(title: &str, screen_width: u32, screen_height: u32) {
 }
 pub fn poll() -> bool {
     unsafe {
+        TEXT = String::new();
         pressed_keys.get_mut().unwrap().get_mut().unwrap().clear();
         for event in events.get_mut().unwrap().get_mut().unwrap().poll_iter() {
             match event {
@@ -84,6 +89,7 @@ pub fn poll() -> bool {
                         k.remove(&key);
                     }
                 }
+                Event::TextInput { text, .. } => { TEXT = text.clone(); }
                 _ => {}
             }
         }
