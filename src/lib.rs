@@ -26,7 +26,7 @@ macro_rules! ok_dialog {
             $(
                 flag1 = $flag;
             )?
-            show_simple_message_box(flag1, $title, $message, unsafe { canvas.get_mut().unwrap().get_mut().unwrap().window() });
+            crate::show_simple_message_box(flag1, $title, $message, unsafe { crate::canvas.get_mut().unwrap().get_mut().unwrap().window() });
         }
     };
 }
